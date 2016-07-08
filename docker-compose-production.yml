@@ -1,4 +1,6 @@
-service:
-  build: 
-    context: ./service
-    dockerfile: Dockerfile-production
+version: '2'
+services:
+  service:
+    build: 
+      context: ./service
+      dockerfile: Dockerfile-production
