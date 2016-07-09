@@ -13,15 +13,35 @@ class Service {
     ];
   }
 
-  static health(request, reply) { reply({ status: 'healthy' }); }
+  static health(request, reply) { 
+    reply({ status: 'healthy' }); 
+  }
 
-  static all(request, reply) { reply(User.run()); }
+  static all(request, reply) { 
+    reply(User.run()); 
+  }
 
-  static save(request, reply) { reply(new User(request.payload).save()); }
+  static save(request, reply) { 
+    if (!request.payload.email)
+      return reply(new Error("User email is needed."));
 
-  static update(request, reply) { reply(User.get(request.payload.id).update(request.payload)); }
+    if (!request.payload.password)
+      return reply(new Error("User password is needed."));
+
+    return reply(new User(request.payload).save()); 
+  }
+
+  static update(request, reply) { 
+    if (!request.payload.id)
+      return reply(new Error("User id is needed."));
+
+    return reply(User.get(request.payload.id).update(request.payload)); 
+  }
 
   static remove(request, reply) {
+    if (!request.payload.id)
+      return reply(new Error("User id is needed."));
+    
     User
     .get(request.payload.id)
     .then(user => reply(user.delete()))
