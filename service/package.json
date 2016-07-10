@@ -12,6 +12,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "boom": "^3.2.2",
     "consul": "^0.25.0",
     "hapi": "^13.4.1",
     "thinky": "^2.3.2"

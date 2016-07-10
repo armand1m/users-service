@@ -1,5 +1,6 @@
 'use strict';
 
+const Boom = require('boom');
 const User = require('./model');
 
 class Service {
@@ -22,18 +23,24 @@ class Service {
   }
 
   static save(request, reply) { 
+    if (!request.payload)
+      return reply(Boom.preconditionRequired('Payload is needed'));
+
     if (!request.payload.email)
-      return reply(new Error("User email is needed."));
+      return reply(Boom.preconditionRequired("User email is needed."));
 
     if (!request.payload.password)
-      return reply(new Error("User password is needed."));
+      return reply(Boom.preconditionRequired("User password is needed."));
 
     return reply(new User(request.payload).save()); 
   }
 
   static update(request, reply) { 
+    if (!request.payload)
+      return reply(Boom.preconditionRequired('Payload is needed'));
+
     if (!request.payload.id)
-      return reply(new Error("User id is needed."));
+      return reply(Boom.preconditionRequired('User id is needed'));
 
     return reply(User.get(request.payload.id).update(request.payload)); 
   }
