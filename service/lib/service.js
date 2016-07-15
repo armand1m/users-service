@@ -2,6 +2,7 @@
 
 const Boom = require('boom');
 const User = require('./model');
+const Messages = require('./messages');
 
 class Service {
   static getRoutes(path) {
@@ -24,30 +25,30 @@ class Service {
 
   static save(request, reply) { 
     if (!request.payload)
-      return reply(Boom.preconditionRequired('Payload is needed'));
+      return reply(Boom.preconditionRequired(Messages.PAYLOAD_IS_NEEDED));
 
     if (!request.payload.email)
-      return reply(Boom.preconditionRequired("User email is needed."));
+      return reply(Boom.preconditionRequired(Messages.USER_EMAIL_IS_NEEDED));
 
     if (!request.payload.password)
-      return reply(Boom.preconditionRequired("User password is needed."));
+      return reply(Boom.preconditionRequired(Messages.USER_PASSWORD_IS_NEEDED));
 
     return reply(new User(request.payload).save()); 
   }
 
   static update(request, reply) { 
     if (!request.payload)
-      return reply(Boom.preconditionRequired('Payload is needed'));
+      return reply(Boom.preconditionRequired(Messages.PAYLOAD_IS_NEEDED));
 
     if (!request.payload.id)
-      return reply(Boom.preconditionRequired('User id is needed'));
+      return reply(Boom.preconditionRequired(Messages.USER_ID_IS_NEEDED));
 
     return reply(User.get(request.payload.id).update(request.payload)); 
   }
 
   static remove(request, reply) {
     if (!request.payload.id)
-      return reply(new Error("User id is needed."));
+      return reply(Boom.preconditionRequired(Messages.USER_ID_IS_NEEDED));
     
     User
     .get(request.payload.id)
