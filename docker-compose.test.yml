@@ -1,0 +1,27 @@
+version: '2'
+services:
+  service:
+    build: ./service
+    env_file: ./properties.env
+    restart: always
+    entrypoint:
+      - npm
+      - run
+      - testd
+    ports:
+      - 80
+    volumes:
+      - ./service:/src/service
+    depends_on:
+      - users_database
+    links:
+      - users_database
+    environment:
+      - NODE_ENV=test
+
+  users_database:
+    extends:
+      file: ./core-services/services.yml
+      service: rethinkdb_service
+    volumes:
+      - ./test-data:/data

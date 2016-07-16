@@ -3,7 +3,7 @@ RUN apk add --update --no-cache nodejs
 RUN npm i nodemon -g
 
 ADD package.json /tmp/package.json
-RUN cd /tmp && npm install --production
+RUN cd /tmp && npm i
 RUN mkdir -p /src/service && cp -a /tmp/package.json /tmp/node_modules /src/
 
 VOLUME /src/service
