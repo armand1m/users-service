@@ -14,11 +14,15 @@ env:
   DB_PORT: 28015
   SERVICE_NAME: users
   SERVICE_PORT: 80
+  CONSUL_HOST: consul
+  CONSUL_PORT: 8500
   PREFIXES: /users
 
 before_install:
   - docker-compose -f ./travis/docker-compose.yml up -d
-  - docker-compose ps
+  - docker-compose -f ./travis/docker-compose.yml ps
+  - cd ./service
+  - npm i
 
 script:
   - npm test
