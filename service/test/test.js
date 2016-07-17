@@ -19,8 +19,8 @@ const POST_USERS_REQUEST_OPTIONS = {
   method: "POST",
   url: USERS_ROUTE,
   payload: {
-    "email": "test@gmail.com",
-    "password": "test123"
+    email: "test@gmail.com",
+     password : "test123"
   }
 }
 
@@ -30,7 +30,8 @@ const PUT_USERS_REQUEST_OPTIONS = id => {
     url: USERS_ROUTE,
     payload: {
       id,
-      "email": "edited@email.com"
+      email: "edited@email.com",
+      active: false
     }
   }
 }
@@ -43,11 +44,6 @@ const DELETE_USERS_REQUEST_OPTIONS = id => {
   }
 }
 
-['SIGINT', 'SIGTERM', 'SIGUSR2'].forEach(signal =>
-  process.on(signal, () => Events.doErrorExit("broken"))
-)
-
-
 describe("User service suite", () => {
   var instance = new Server().configure()
   var testUser = null
@@ -57,7 +53,7 @@ describe("User service suite", () => {
   })
 
   describe("GET /health", () => {
-    it("should return a status code 200 and service status in response payload.", done => {
+    it("should return a status code 200 and service url and status in response payload.", done => {
       instance
       .server
       .inject(GET_HEALTH_REQUEST_OPTIONS)
@@ -66,7 +62,9 @@ describe("User service suite", () => {
         return response.result
       })
       .then(body => {
-        expect(body).to.deep.equal({ status: "healthy" })
+        expect(body).to.have.property("status").to.equals("healthy")
+        expect(body).to.have.property("url")
+
         done()
       })
       .catch(done)
@@ -189,6 +187,75 @@ describe("User service suite", () => {
       .catch(done)
     })
 
+    it("should return a status code 404 when sending request with an invalid id.", done => {
+      instance
+      .server
+      .inject(Object.assign({}, GET_USERS_REQUEST_OPTIONS, {
+        url: `${USERS_ROUTE}?id=xxxxx`
+      }))
+      .then(response => {
+        expect(response.statusCode).to.equal(404)
+        done();
+      })
+      .catch(done)
+    })
+
+    it("should return a status code 200 and an array of results when sending request querying by the 'active' parameter.", done => {
+      instance
+      .server
+      .inject(Object.assign({}, GET_USERS_REQUEST_OPTIONS, {
+        url: `${USERS_ROUTE}?active=true`
+      }))
+      .then(response => {
+        expect(response.statusCode).to.equal(200)
+        return response.result
+      })
+      .then(body => {
+        expect(body).to.be.an('array')
+
+        body.forEach(entry => expect(entry).to.have.property('active').to.be.true)
+        
+        done()
+      })
+      .catch(done)
+    })
+
+    it("should return a status code 200 and an empty array as payload when sending request querying by non existent data.", done => {
+      instance
+      .server
+      .inject(Object.assign({}, GET_USERS_REQUEST_OPTIONS, {
+        url: `${USERS_ROUTE}?active=false`
+      }))
+      .then(response => {
+        expect(response.statusCode).to.equal(200)
+        return response.result
+      })
+      .then(body => {
+        expect(body).to.be.an('array')
+        expect(body).to.be.empty
+        done()
+      })
+      .catch(done)
+    })
+
+    it("should return a status code 400 when sending request with invalid parameters as query string.", done => {
+      instance
+      .server
+      .inject(Object.assign({}, GET_USERS_REQUEST_OPTIONS, {
+        url: `${USERS_ROUTE}?invalid=inv4l1dValu3`
+      }))
+      .then(response => {
+        expect(response.statusCode).to.equal(400)
+        return response.result
+      })
+      .then(body => {
+        expect(body.validation.source).to.equal("query")
+        expect('invalid').to.be.oneOf(body.validation.keys)
+
+        done()
+      })
+      .catch(done)
+    })
   })
 
   describe("PUT /users", () => {

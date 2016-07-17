@@ -1,9 +1,7 @@
 'use strict';
 
-const Joi = require('joi');
 const Boom = require('boom');
 const User = require('./model');
-const Messages = require('./messages');
 
 class Service {
   static getRoutes(path) {
@@ -20,7 +18,9 @@ class Service {
         config: {
           validate: {
             query: {
-              id: Joi.string().optional()
+              id: User.types.id.optional(),
+              email: User.types.email.optional(),
+              active: User.types.active.optional()
             }
           }
         }
@@ -32,9 +32,9 @@ class Service {
         config: {
           validate: {
             payload: {
-              email: Joi.string().email().required(),
-              password: Joi.string().required(),
-              active: Joi.boolean().optional()
+              email: User.types.email.required(),
+              password: User.types.password.required(),
+              active: User.types.active.optional()
             }
           },
         } 
@@ -46,10 +46,10 @@ class Service {
         config: {
           validate: {
             payload: {
-              id: Joi.string().required(),
-              email: Joi.string().email(),
-              password: Joi.string().optional(),
-              active: Joi.boolean().optional()
+              id: User.types.id.required(),
+              email: User.types.email.optional(),
+              password: User.types.password.optional(),
+              active: User.types.active.optional()
             }
           } 
         } 
@@ -61,7 +61,7 @@ class Service {
         config: {
           validate: {
             payload: {
-              id: Joi.string().required()
+              id: User.types.id.required()
             }
           }
         } 
@@ -70,12 +70,23 @@ class Service {
   }
 
   static health(request, reply) { 
-    reply({ status: 'healthy' }); 
+    reply({ url: request.server.info.url, status: 'healthy' }); 
   }
 
   static all(request, reply) { 
     if (request.query.id)
-      return reply(User.get(request.query.id));
+      return User
+      .get(request.query.id)
+      .then(reply)
+      .catch(err => {
+        if (err.name == 'DocumentNotFoundError')
+          return reply(Boom.notFound(`Resource with id ${request.query.id} could not be found.`));
+
+        return reply(err);
+      })
+
+    if (request.query)
+      return reply(User.filter(request.query).run());
 
     return reply(User.run()); 
   }

@@ -33,28 +33,16 @@ module.exports = class Server {
 
     server.connection({
       port: this.port,
-      routes: {
-        cors: true
-      }
+      routes: { cors: true }
     });
 
-    server.on('route', this.onRouteAdd);
-
-    server.route({
-      method: 'GET',
-      path: `${this.url}/host`,
-      handler(request, reply) { reply({ host: server.info.host }) }
-    });
+    server.on('route', route => console.log(`+ ${route.method} ${route.path}`));
 
     Service
     .getRoutes(this.url)
     .forEach(route => server.route(route));
 
     return this;
-  }
-
-  onRouteAdd(route) {
-    console.log(`+ ${route.method} ${route.path}`);
   }
 
   start() {
