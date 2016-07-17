@@ -1,20 +1,20 @@
-'use strict';
+'use strict'
 
-const Hapi = require('hapi');
-const ConsulAgentService = require('./consul').agent.service;
-const Service = require('./service');
+const Hapi = require('hapi')
+const ConsulAgentService = require('./consul').agent.service
+const Service = require('./service')
 
 module.exports = class Server {
   constructor() {
-    this.server = new Hapi.Server();
-    this.prefixes = process.env.PREFIXES.split(",");
-    this.name = process.env.SERVICE_NAME;
-    this.port = +process.env.SERVICE_PORT;
-    this.url = this.prefixes[0];
+    this.server = new Hapi.Server()
+    this.prefixes = process.env.PREFIXES.split(",")
+    this.name = process.env.SERVICE_NAME
+    this.port = +process.env.SERVICE_PORT
+    this.url = this.prefixes[0]
   }
 
   get description() {
-    var server = this.server;
+    var server = this.server
 
     return {
       name: `${this.name}:${server.info.id}`,
@@ -25,35 +25,35 @@ module.exports = class Server {
         http: `${server.info.uri}/health`,
         interval: '10s'
       }
-    };
+    }
   }
 
   configure() {
-    var server = this.server;
+    var server = this.server
 
     server.connection({
       port: this.port,
       routes: { cors: true }
-    });
+    })
 
-    server.on('route', route => console.log(`+ ${route.method} ${route.path}`));
+    server.on('route', route => console.log(`+ ${route.method} ${route.path}`))
 
     Service
     .getRoutes(this.url)
-    .forEach(route => server.route(route));
+    .forEach(route => server.route(route))
 
-    return this;
+    return this
   }
 
   start() {
-    return new Promise((resolve, reject) => this.server.start(err => err ? reject(err) : resolve(this)));
+    return new Promise((resolve, reject) => this.server.start(err => err ? reject(err) : resolve(this)))
   }
 
   register() {
-    return ConsulAgentService.register(this.description);
+    return ConsulAgentService.register(this.description)
   }
 
   unregister() {
-    return ConsulAgentService.deregister(this.description.name);
+    return ConsulAgentService.deregister(this.description.name)
   }
 }

@@ -1,8 +1,8 @@
-'use strict';
+'use strict'
 
-const Joi = require('joi');
-const Database = require('./database');
-const type = require('thinky').type;
+const Joi = require('joi')
+const Database = require('./database')
+const type = require('thinky').type
 
 const schema = (builder, enforced) => {
   var cleanSchema = {
@@ -12,21 +12,21 @@ const schema = (builder, enforced) => {
     active: builder.boolean()
   }
 
-  if (!enforced) 
-    return cleanSchema;
+  if (!enforced)
+    return cleanSchema
 
   var enforcedSchema = {
     id: cleanSchema.id,
-    email: cleanSchema.email.required(),  
-    password: cleanSchema.password.required(),  
-    active: cleanSchema.active.default(true)  
+    email: cleanSchema.email.required(),
+    password: cleanSchema.password.required(),
+    active: cleanSchema.active.default(true)
   }
 
-  return enforcedSchema;
+  return enforcedSchema
 }
 
-const Model = Database.createModel("User", schema(type, true));
+const Model = Database.createModel("User", schema(type, true))
 
-Model.types = schema(Joi);
+Model.types = schema(Joi)
 
-module.exports = Model;
+module.exports = Model

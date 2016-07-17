@@ -1,19 +1,19 @@
-'use strict';
+'use strict'
 
-const Boom = require('boom');
-const User = require('./model');
+const Boom = require('boom')
+const User = require('./model')
 
 class Service {
   static getRoutes(path) {
     return [
-      { 
-        path: '/health', 
-        method: 'GET', 
+      {
+        path: '/health',
+        method: 'GET',
         handler: Service.health
       },
-      { 
-        path, 
-        method: 'GET', 
+      {
+        path,
+        method: 'GET',
         handler: Service.all,
         config: {
           validate: {
@@ -25,9 +25,9 @@ class Service {
           }
         }
       },
-      { 
-        path, 
-        method: 'POST', 
+      {
+        path,
+        method: 'POST',
         handler: Service.save,
         config: {
           validate: {
@@ -37,11 +37,11 @@ class Service {
               active: User.types.active.optional()
             }
           },
-        } 
+        }
       },
-      { 
-        path, 
-        method: 'PUT', 
+      {
+        path,
+        method: 'PUT',
         handler: Service.update,
         config: {
           validate: {
@@ -51,12 +51,12 @@ class Service {
               password: User.types.password.optional(),
               active: User.types.active.optional()
             }
-          } 
-        } 
+          }
+        }
       },
-      { 
-        path, 
-        method: 'DELETE', 
+      {
+        path,
+        method: 'DELETE',
         handler: Service.remove,
         config: {
           validate: {
@@ -64,44 +64,49 @@ class Service {
               id: User.types.id.required()
             }
           }
-        } 
+        }
       }
-    ];
+    ]
   }
 
-  static health(request, reply) { 
-    reply({ url: request.server.info.url, status: 'healthy' }); 
+  static health(request, reply) {
+    reply({ url: request.server.info.url, status: 'healthy' })
   }
 
-  static all(request, reply) { 
+  static all(request, reply) {
     if (request.query.id)
-      return User
+      return Service.getById(request, reply)
+
+    if (request.query)
+      return reply(User.filter(request.query).run())
+
+    return reply(User.run())
+  }
+
+  static save(request, reply) {
+    return reply(new User(request.payload).save()).code(201)
+  }
+
+  static update(request, reply) {
+    return reply(User.get(request.payload.id).update(request.payload)).code(201)
+  }
+
+  static remove(request, reply) {
+    return reply(User.get(request.payload.id).then(user => user.delete()))
+  }
+
+  static getById(request, reply) {
+    return
+      User
       .get(request.query.id)
       .then(reply)
       .catch(err => {
         if (err.name == 'DocumentNotFoundError')
-          return reply(Boom.notFound(`Resource with id ${request.query.id} could not be found.`));
+          return reply(Boom.notFound(`Resource with id ${request.query.id} could not be found.`))
 
-        return reply(err);
+        return reply(err)
       })
-
-    if (request.query)
-      return reply(User.filter(request.query).run());
-
-    return reply(User.run()); 
-  }
-
-  static save(request, reply) { 
-    return reply(new User(request.payload).save()).code(201); 
-  }
-
-  static update(request, reply) { 
-    return reply(User.get(request.payload.id).update(request.payload)).code(201); 
-  }
-
-  static remove(request, reply) {
-    return reply(User.get(request.payload.id).then(user => user.delete()));
   }
 }
 
-module.exports = Service;
+module.exports = Service
