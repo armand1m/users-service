@@ -1,5 +1,7 @@
 # Users Service
 
+![image](https://travis-ci.org/armand1m/users-service.svg?branch=master)
+
 This is a microservice built in Node.js using Hapi and RethinkDB with the purpose of handling users.
 
 # Development Environment
