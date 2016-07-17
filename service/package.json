@@ -7,6 +7,7 @@
     "start": "node ./service/index.js",
     "startd": "nodemon ./service/index.js",
     "test": "mocha --recursive ./service/test",
+    "test-travis": "mocha --recursive",
     "testd": "mocha --recursive --watch ./service/test"
   },
   "author": "",
