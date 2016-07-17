@@ -75,7 +75,15 @@ class Service {
 
   static all(request, reply) {
     if (request.query.id)
-      return Service.getById(request, reply)
+      return User
+      .get(request.query.id)
+      .then(reply)
+      .catch(err => {
+        if (err.name == 'DocumentNotFoundError')
+          return reply(Boom.notFound(`Resource with id ${request.query.id} could not be found.`))
+
+        return reply(err)
+      })
 
     if (request.query)
       return reply(User.filter(request.query).run())
@@ -93,19 +101,6 @@ class Service {
 
   static remove(request, reply) {
     return reply(User.get(request.payload.id).then(user => user.delete()))
-  }
-
-  static getById(request, reply) {
-    return
-      User
-      .get(request.query.id)
-      .then(reply)
-      .catch(err => {
-        if (err.name == 'DocumentNotFoundError')
-          return reply(Boom.notFound(`Resource with id ${request.query.id} could not be found.`))
-
-        return reply(err)
-      })
   }
 }
 
