@@ -9,9 +9,21 @@ class Service {
   static getRoutes(path) {
     return [
       { 
+        path: '/health', 
+        method: 'GET', 
+        handler: Service.health
+      },
+      { 
         path, 
         method: 'GET', 
-        handler: Service.all
+        handler: Service.all,
+        config: {
+          validate: {
+            query: {
+              id: Joi.string().optional()
+            }
+          }
+        }
       },
       { 
         path, 
@@ -21,7 +33,8 @@ class Service {
           validate: {
             payload: {
               email: Joi.string().email().required(),
-              password: Joi.string().required()
+              password: Joi.string().required(),
+              active: Joi.boolean().optional()
             }
           },
         } 
@@ -29,31 +42,28 @@ class Service {
       { 
         path, 
         method: 'PUT', 
+        handler: Service.update,
         config: {
           validate: {
-            params: {}
-          },
-          handler: Service.update
+            payload: {
+              id: Joi.string().required(),
+              email: Joi.string().email(),
+              password: Joi.string().optional(),
+              active: Joi.boolean().optional()
+            }
+          } 
         } 
       },
       { 
         path, 
         method: 'DELETE', 
+        handler: Service.remove,
         config: {
           validate: {
-            params: {}
-          },
-          handler: Service.remove
-        } 
-      },
-      { 
-        path: '/health', 
-        method: 'GET', 
-        config: {
-          validate: {
-            params: {}
-          },
-          handler: Service.health
+            payload: {
+              id: Joi.string().required()
+            }
+          }
         } 
       }
     ];
@@ -64,7 +74,10 @@ class Service {
   }
 
   static all(request, reply) { 
-    reply(User.run()); 
+    if (request.query.id)
+      return reply(User.get(request.query.id));
+
+    return reply(User.run()); 
   }
 
   static save(request, reply) { 
@@ -76,10 +89,7 @@ class Service {
   }
 
   static remove(request, reply) {
-    User
-    .get(request.payload.id)
-    .then(user => reply(user.delete()))
-    .error(error => reply(error));
+    return reply(User.get(request.payload.id).then(user => user.delete()));
   }
 }
 
