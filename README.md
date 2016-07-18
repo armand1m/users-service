@@ -11,9 +11,7 @@ The development environment is defined in the default `docker-compose.yml` file.
 It uses volumes and `nodemon` so you don't need to rebuild the image and run the container everytime you do code changes.
 
 ## Running development environment
-    ```bash
     $ sudo docker-compose up -d
-    ```
 
 # Test Environment
 
@@ -21,10 +19,14 @@ The test environment is defined in the `docker-compose.test.yml` file.
 
 It uses volumes and `mocha --recursive --watch`, so you have live reloading of your code changes like in the development environment without needing to rebuild the image.
 
+## Running test suite once
+    $ sudo docker-compose -f docker-compose.test.yml up
+
 ## Running test development environment
-    ```bash
-    $ sudo docker-compose -f docker-compose.test.yml up -d
-    ```
+    $ sudo docker-compose -f docker-compose.testd.yml up -d
+
+## Logging
+    $ sudo docker-compose logs
 
 # Production Environment
 
