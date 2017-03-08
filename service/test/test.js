@@ -18,10 +18,7 @@ const GET_USERS_REQUEST_OPTIONS = {
 const POST_USERS_REQUEST_OPTIONS = {
   method: "POST",
   url: USERS_ROUTE,
-  payload: {
-    email: "test@gmail.com",
-     password : "test123"
-  }
+  payload: require('./fixtures/test-user.json')
 }
 
 const PUT_USERS_REQUEST_OPTIONS = id => {
