@@ -60,7 +60,7 @@ describe("User service suite", () => {
         })
         .then(body => {
           expect(body).to.have.property("status").to.equals("healthy")
-          expect(body).to.have.property("url")
+          expect(body).to.have.property("uri")
         })
         .then(done)
         .catch(done)
