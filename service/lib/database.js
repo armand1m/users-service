@@ -1,11 +1,3 @@
-const Events = require('./events')
-const thinky = require('thinky')
+const { thinky } = require('./configuration')
 
-let database = thinky({
-  db: process.env.SERVICE_NAME,
-  host: process.env.DB_HOST,
-  port: process.env.DB_PORT,
-  silent: true
-})
-
-module.exports = database
+module.exports = require('thinky')(thinky)

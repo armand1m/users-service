@@ -4,29 +4,22 @@ const Joi = require('joi')
 const Database = require('./database')
 const type = require('thinky').type
 
-const schema = (builder, enforced) => {
-  var cleanSchema = {
-    id: builder.string(),
-    email: builder.string().email(),
-    password: builder.string(),
-    active: builder.boolean()
-  }
-
-  if (!enforced)
-    return cleanSchema
-
-  var enforcedSchema = {
-    id: cleanSchema.id,
-    email: cleanSchema.email.required(),
-    password: cleanSchema.password.required(),
-    active: cleanSchema.active.default(true)
-  }
-
-  return enforcedSchema
+const DATABASE_SCHEMA = {
+  id: type.string(),
+  email: type.string().email().required(),
+  password: type.string().required(),
+  active: type.boolean().default(true)
 }
 
-const Model = Database.createModel("User", schema(type, true))
+const JOI_SCHEMA = {
+  id: Joi.string().description("User Id"),
+  email: Joi.string().email().description("User Email"),
+  password: Joi.string().description("User Password"),
+  active: Joi.boolean().description("User Active Flag")
+}
 
-Model.types = schema(Joi)
+const Model = Database.createModel("User", DATABASE_SCHEMA)
+
+Model.types = JOI_SCHEMA
 
 module.exports = Model

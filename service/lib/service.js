@@ -1,21 +1,26 @@
-'use strict'
+  'use strict'
 
 const Boom = require('boom')
 const User = require('./model')
+const Configuration = require('./configuration')
 
 class Service {
   static getRoutes(path) {
     return [
       {
-        path: '/health',
+        path: `${path}/health`,
         method: 'GET',
-        handler: Service.health
+        config: {
+          handler: Service.health,
+          tags: ['api']
+        }
       },
       {
         path,
         method: 'GET',
-        handler: Service.all,
         config: {
+          handler: Service.all,
+          tags: ['api'],
           validate: {
             query: {
               id: User.types.id.optional(),
@@ -28,8 +33,9 @@ class Service {
       {
         path,
         method: 'POST',
-        handler: Service.save,
         config: {
+          handler: Service.save,
+          tags: ['api'],
           validate: {
             payload: {
               email: User.types.email.required(),
@@ -42,8 +48,9 @@ class Service {
       {
         path,
         method: 'PUT',
-        handler: Service.update,
         config: {
+          handler: Service.update,
+          tags: ['api'],
           validate: {
             payload: {
               id: User.types.id.required(),
@@ -57,8 +64,9 @@ class Service {
       {
         path,
         method: 'DELETE',
-        handler: Service.remove,
         config: {
+          handler: Service.remove,
+          tags: ['api'],
           validate: {
             payload: {
               id: User.types.id.required()
@@ -70,7 +78,10 @@ class Service {
   }
 
   static health(request, reply) {
-    reply({ url: request.server.info.url, status: 'healthy' })
+    return reply({ 
+      uri: Configuration.service.uri,
+      status: 'healthy' 
+    })
   }
 
   static all(request, reply) {

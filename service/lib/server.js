@@ -2,44 +2,37 @@
 
 const Hapi = require('hapi')
 const ConsulAgentService = require('./consul').agent.service
+const Configuration = require('./configuration')
 const Service = require('./service')
+const HapiSwagger = require('hapi-swagger')
 
 module.exports = class Server {
   constructor() {
     this.server = new Hapi.Server()
-    this.prefixes = process.env.PREFIXES.split(",")
-    this.name = process.env.SERVICE_NAME
-    this.port = +process.env.SERVICE_PORT
-    this.url = this.prefixes[0]
-  }
-
-  get description() {
-    var server = this.server
-
-    return {
-      name: `${this.name}:${server.info.id}`,
-      address: server.info.host,
-      port: this.port,
-      tags: this.prefixes.map(prefix => `urlprefix-${prefix}`),
-      check: {
-        http: `${server.info.uri}/health`,
-        interval: '10s'
-      }
-    }
   }
 
   configure() {
-    var server = this.server
+    let server = this.server
 
-    server.connection({
-      port: this.port,
-      routes: { cors: true }
+    server.connection(Configuration.server.connection)
+
+    server.on('route', Configuration.server.onAddRoute)
+
+    server.register([
+      require('inert'),
+      require('vision'),
+      {
+        register: HapiSwagger,
+        options: Configuration.swagger
+      }
+    ], err => {
+      if (err) {
+        throw err
+      }
     })
 
-    server.on('route', route => console.log(`+ ${route.method} ${route.path}`))
-
     Service
-    .getRoutes(this.url)
+    .getRoutes(Configuration.service.route)
     .forEach(route => server.route(route))
 
     return this
@@ -50,10 +43,10 @@ module.exports = class Server {
   }
 
   register() {
-    return ConsulAgentService.register(this.description)
+    return ConsulAgentService.register(Configuration.service.description)
   }
 
   unregister() {
-    return ConsulAgentService.deregister(this.description.name)
+    return ConsulAgentService.deregister(Configuration.service.description.name)
   }
 }
